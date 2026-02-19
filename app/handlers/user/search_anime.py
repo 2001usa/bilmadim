@@ -23,8 +23,7 @@ from aiogram.types import ChatJoinRequest
 import io
 from aiogram.types import InputFile
 
-trailers_base_chat = -1001990975355
-series_base_chat = -1002076256295
+from config import trailers_base_chat, series_base_chat
 
 user_search_router = Router()
 
@@ -63,6 +62,7 @@ async def action(call: CallbackQuery, state: FSMContext):
         media = get_media_base(media_id)
         
         trailer_id = media["trailer_id"]
+        msg_id = media.get("msg_id")
 
         name = media['name']
         genre = media['genre']
@@ -87,10 +87,27 @@ async def action(call: CallbackQuery, state: FSMContext):
         await state.set_state(Media.menu)
         await call.message.delete()
 
-        try:
-            await call.message.answer_video(video=trailer_id,caption=text,parse_mode=ParseMode.HTML,reply_markup=user_act_5_clbtn(series,media_id))
-        except:
-            await call.message.answer_photo(photo=trailer_id,caption=text,parse_mode=ParseMode.HTML,reply_markup=user_act_5_clbtn(series,media_id))
+        if msg_id:
+            try:
+                await call.message.bot.copy_message(
+                    chat_id=user_id,
+                    from_chat_id=trailers_base_chat,
+                    message_id=msg_id,
+                    caption=text,
+                    parse_mode=ParseMode.HTML,
+                    reply_markup=user_act_5_clbtn(series, media_id)
+                )
+            except Exception as e:
+                # Fallback if copy_message fails (e.g. message deleted in channel)
+                try:
+                    await call.message.answer_video(video=trailer_id,caption=text,parse_mode=ParseMode.HTML,reply_markup=user_act_5_clbtn(series,media_id))
+                except:
+                     await call.message.answer_photo(photo=trailer_id,caption=text,parse_mode=ParseMode.HTML,reply_markup=user_act_5_clbtn(series,media_id))
+        else:
+            try:
+                await call.message.answer_video(video=trailer_id,caption=text,parse_mode=ParseMode.HTML,reply_markup=user_act_5_clbtn(series,media_id))
+            except:
+                await call.message.answer_photo(photo=trailer_id,caption=text,parse_mode=ParseMode.HTML,reply_markup=user_act_5_clbtn(series,media_id))
 
     else:
         await state.clear()

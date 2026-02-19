@@ -22,6 +22,7 @@ from app.keyboards.admin.keyboard_buttons import *
 from aiogram.types import ChatJoinRequest
 import io
 from aiogram.types import InputFile
+from config import series_base_chat
 
 user_media_router = Router()
 
@@ -55,12 +56,13 @@ async def action(call: CallbackQuery, state: FSMContext):
 <i>1 - qism</i>
 """
 
-        await call.message.edit_media(
-            media=InputMediaVideo(
-                media=first_episode["episode_id"],
-                caption=caption,
-                parse_mode=ParseMode.HTML
-            ),
+        await call.message.delete()
+        await call.message.bot.copy_message(
+            chat_id=user_id,
+            from_chat_id=series_base_chat,
+            message_id=first_episode["msg_id"],
+            caption=caption,
+            parse_mode=ParseMode.HTML,
             reply_markup=user_act_6_clbtn(media_episodes,0,first_episode["episode_num"],media_id)
         )
 
@@ -80,14 +82,16 @@ async def action(call: CallbackQuery, state: FSMContext):
 <i>{episode_num} - qism</i>
 """
         
-        await call.message.answer_video(
-            video=episode["episode_id"],
+
+        await call.message.bot.copy_message(
+            chat_id=user_id,
+            from_chat_id=series_base_chat,
+            message_id=episode["msg_id"],
             caption=caption,
             parse_mode=ParseMode.HTML,
             reply_markup=user_act_6_clbtn(media_episodes,page,episode["episode_num"],media_id)
         )
-
-        await call.message.edit_reply_markup(reply_markup=None)
+        await call.message.delete()
 
     elif command == "next" or command == "previous":
         page = int(call.data.split(",")[2])
@@ -97,7 +101,16 @@ async def action(call: CallbackQuery, state: FSMContext):
         media_episodes = get_media_episodes_base(media_id)
         episode = media_episodes[episode_num-1]
 
-        await call.message.edit_reply_markup(
+        await call.message.delete()
+        await call.message.bot.copy_message(
+            chat_id=user_id,
+            from_chat_id=series_base_chat,
+            message_id=episode["msg_id"],
+            caption=f"""
+<b>{media['name']}</b>
+<i>{episode_num} - qism</i>
+""",
+            parse_mode=ParseMode.HTML,
             reply_markup=user_act_6_clbtn(media_episodes,page,episode["episode_num"],media_id)
         )
 

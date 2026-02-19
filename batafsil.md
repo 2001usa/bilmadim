@@ -1,4 +1,4 @@
-# 🤖 AniLegend Bot - Batafsil Qo'llanma
+# 🤖 Bilmadim Bot - Batafsil Qo'llanma
 
 Ushbu hujjat **AniLegend** botining barcha imkoniyatlari, adminlar uchun qo'llanma va texnik tafsilotlarlarni o'z ichiga oladi.
 
